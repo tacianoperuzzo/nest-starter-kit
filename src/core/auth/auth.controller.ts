@@ -1,31 +1,36 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
-import { CreateUserDto } from 'src/modules/users/dtos/createUser.dto';
-import { UserService } from 'src/modules/users/user.service';
+import {
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LocalAuthGuard } from './guards/local-auth.guard';
+import { IsPublic } from './decorators/is-public.decorator';
 import { RefreshJwtGuard } from './guards/jwt-refresh.guard';
+import { LocalAuthGuard } from './guards/local-auth.guard';
+import { AuthRequest } from './models/AuthRequest';
 
+@IsPublic()
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private authService: AuthService,
-    private userService: UserService,
-  ) {}
+  constructor(private authService: AuthService) {}
 
   @UseGuards(LocalAuthGuard)
+  @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Request() req: any) {
+  async login(@Request() req: AuthRequest) {
     return await this.authService.login(req.user);
   }
 
-  @Post('register')
-  async registerUser(@Body() createUserDto: CreateUserDto) {
-    return await this.userService.createUser(createUserDto);
-  }
-
+  @ApiBearerAuth()
   @UseGuards(RefreshJwtGuard)
+  @IsPublic()
   @Post('refresh')
-  async refrshToken(@Request() req: any) {
+  async refreshToken(@Request() req: AuthRequest) {
     return this.authService.refreshToken(req.user);
   }
 }

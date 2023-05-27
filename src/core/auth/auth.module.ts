@@ -7,7 +7,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt-strategy';
 import { LocalStrategy } from './strategies/local-strategy';
-import { RefreshJwtStrategy } from './strategies/refreshToken.strategy';
+import { RefreshJwtStrategy } from './strategies/refresh-token.strategy';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   providers: [
@@ -20,10 +21,11 @@ import { RefreshJwtStrategy } from './strategies/refreshToken.strategy';
   ],
   controllers: [AuthController],
   imports: [
+    ConfigModule.forRoot(),
     TypeOrmModule.forFeature([UserEntity]),
     JwtModule.register({
-      secret: `${process.env.jwt_secret}`,
-      signOptions: { expiresIn: '60s' },
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '24h' },
     }),
   ],
 })

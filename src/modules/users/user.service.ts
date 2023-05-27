@@ -16,7 +16,7 @@ export class UserService {
 
   async createUser(userDto: CreateUserDto): Promise<UserEntity> {
     const user = this.userRepository.create(
-      this.userCreateMapper.mapFrom(userDto),
+      await this.userCreateMapper.mapFrom(userDto),
     );
     return await this.userRepository.save(user);
   }
